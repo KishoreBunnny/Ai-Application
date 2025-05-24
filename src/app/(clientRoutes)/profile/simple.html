@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Student Management</h1>
+  <form id="studentForm">
+    <input type="text" id="name" placeholder="Enter name" required>
+    <input type="number" id="age" placeholder="Enter age" required>
+    <button type="submit">Add Student</button>
+  </form>
+  <ul id="studentList"></ul>
+
+  <script>
+    const form = document.getElementById('studentForm');
+    const list = document.getElementById('studentList');
+
+    async function fetchStudents() {
+      const res = await fetch('/students');
+      const data = await res.json();
+      list.innerHTML = '';
+      data.forEach((student, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `${student.name} (${student.age}) <button onclick="deleteStudent(${i})">Delete</button>`;
+        list.appendChild(li);
+      });
+    }
+
+    async function deleteStudent(index) {
+      await fetch('/students/' + index, { method: 'DELETE' });
+      fetchStudents();
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const age = document.getElementById('age').value;
+      await fetch('/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, age })
+      });
+      form.reset();
+      fetchStudents();
+    });
+
+    fetchStudents();
+  </script>
+</body>
+</html>
